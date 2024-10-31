@@ -23,6 +23,15 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "Board.h"
+#include "Location.h"
+#include "Snake.h"
+#include "Goal.h"
+#include "Border.h"
+#include "Trash.h"
+#include <random>
+
+
 
 class Game
 {
@@ -42,5 +51,35 @@ private:
 	Graphics gfx;
 	/********************************/
 	/*  User Variables              */
+
+	Board board;
+	std::random_device rd;
+	std::mt19937 rng;
+
+	std::uniform_int_distribution<int> xDist;
+	std::uniform_int_distribution<int> yDist;
+
+
+	Location start_loc = { 5,5 };
+	Location delta_loc = { 1,0 };
+
+	Location locGoal = {xDist(rng), yDist(rng)};
+	Location locNewTrash = { xDist(rng), yDist(rng) };
+	Snake snake;
+	Goal goal;
+	Border border;
+	Trash trash;
+
+	int snakeRatePeriod = 10;
+	int snakeRateCounter = 0;
+
+	int trashAppearanceRate = 100;
+	int trashAppearanceCounter = 0;
+
+	int GameStart = 0;
+	int GameOver = 0;
+
 	/********************************/
+
+	
 };

@@ -20,11 +20,21 @@
  ******************************************************************************************/
 #include "MainWindow.h"
 #include "Game.h"
+#include <random>
+#include "SpriteCodex.h"
 
-Game::Game( MainWindow& wnd )
+Game::Game(MainWindow& wnd)
 	:
-	wnd( wnd ),
-	gfx( wnd )
+	wnd(wnd),
+	gfx(wnd),
+	board(gfx),
+	rng(rd()),
+	snake(start_loc),
+	xDist(1, 38), //because of borders
+	yDist(1, 28), //because of borders
+	goal(locGoal),
+	border(0, 40, 0, 30),
+	trash(locNewTrash)
 {
 }
 
@@ -38,8 +48,74 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-}
+	//Location delta_loc = { 0 , 1 };
+	//int porasti = 0;
 
+	if ((GameStart) && (!GameOver)) {
+
+		if (wnd.kbd.KeyIsPressed(VK_LEFT)) {
+			delta_loc = { -1 ,0};
+		}
+		if (wnd.kbd.KeyIsPressed(VK_RIGHT)) {
+			delta_loc = { 1 , 0 };
+		}
+		if (wnd.kbd.KeyIsPressed(VK_DOWN)) {
+			delta_loc = { 0, 1 };
+		}
+		if (wnd.kbd.KeyIsPressed(VK_UP)) {
+			delta_loc = { 0,-1 };
+		}
+
+		if (trashAppearanceCounter == trashAppearanceRate) {
+			trashAppearanceCounter = 0;
+			trash.PolluteMore();
+			locNewTrash = { xDist(rng), yDist(rng) };
+			trash.AppearNew(locNewTrash);
+		}
+		else {
+			trashAppearanceCounter++;
+		}
+
+
+
+		if (snakeRateCounter == snakeRatePeriod) {
+			snakeRateCounter = 0;
+			if (snake.isEaten(goal.GetLoc())) {
+				snake.Grow();
+				//snakeRatePeriod--;
+				snakeRatePeriod = std::max(snakeRatePeriod - 1, 0);
+				locGoal = { xDist(rng), yDist(rng) };
+				goal.Replace(locGoal);
+			}
+
+			snake.MoveBy(delta_loc);
+			if ((snake.isBitten()) || (border.isHit(snake)) || (trash.IsEaten(snake))) {
+				GameOver = 1;
+			}
+		}
+		else {
+			snakeRateCounter++;
+		}
+		
+	}
+	else {
+		if (wnd.kbd.KeyIsPressed(VK_RETURN)) {
+			GameStart = 1;
+		}
+	}
+}
 void Game::ComposeFrame()
 {
+	if ((GameStart) && (!GameOver)) {
+		snake.Draw(board);
+		goal.Draw(board);
+		border.Draw(board);
+		trash.Draw(board);
+	}
+	else if (GameOver) {
+		SpriteCodex::DrawGameOver(300, 250, gfx);
+	}
+	else if (!GameStart){
+		SpriteCodex::DrawTitle(250, 250, gfx);
+	}
 }
