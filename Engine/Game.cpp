@@ -48,53 +48,44 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	//Location delta_loc = { 0 , 1 };
-	//int porasti = 0;
+	//frameTimer
+	const float dt = frameTimer.Mark();
 
 	if ((GameStart) && (!GameOver)) {
 
-		if (wnd.kbd.KeyIsPressed(VK_LEFT)) {
-			delta_loc = { -1 ,0};
-		}
-		if (wnd.kbd.KeyIsPressed(VK_RIGHT)) {
-			delta_loc = { 1 , 0 };
-		}
-		if (wnd.kbd.KeyIsPressed(VK_DOWN)) {
-			delta_loc = { 0, 1 };
-		}
-		if (wnd.kbd.KeyIsPressed(VK_UP)) {
-			delta_loc = { 0,-1 };
-		}
+		delta_loc = DetermineDirection();
 
-		if (trashAppearanceCounter == trashAppearanceRate) {
-			trashAppearanceCounter = 0;
+		//trash
+		if (trashAppearanceCounter >= trashAppearanceRatePeriod) {
+			trashAppearanceCounter = 0.0f;
 			trash.PolluteMore();
 			locNewTrash = { xDist(rng), yDist(rng) };
 			trash.AppearNew(locNewTrash);
 		}
 		else {
-			trashAppearanceCounter++;
+			trashAppearanceCounter += 1.0f * dt * 60;
 		}
 
 
-
-		if (snakeRateCounter == snakeRatePeriod) {
-			snakeRateCounter = 0;
+		//snake
+	    //snake rate
+		if (snakeRateCounter >= snakeRatePeriod) {
+			snakeRateCounter = 0.0f;
+			//goal
 			if (snake.isEaten(goal.GetLoc())) {
 				snake.Grow();
-				//snakeRatePeriod--;
-				snakeRatePeriod = std::max(snakeRatePeriod - 1, 0);
+				snakeRatePeriod = std::max(snakeRatePeriod - 1.0f * dt * 60, 0.0f);
 				locGoal = { xDist(rng), yDist(rng) };
 				goal.Replace(locGoal);
 			}
-
 			snake.MoveBy(delta_loc);
+			//failure test
 			if ((snake.isBitten()) || (border.isHit(snake)) || (trash.IsEaten(snake))) {
 				GameOver = 1;
 			}
 		}
 		else {
-			snakeRateCounter++;
+			snakeRateCounter += 1.0f * dt * 60;
 		}
 		
 	}
@@ -104,9 +95,27 @@ void Game::UpdateModel()
 		}
 	}
 }
+Location Game::DetermineDirection()
+{
+	if (wnd.kbd.KeyIsPressed(VK_LEFT)) {
+		delta_loc = { -1 ,0 };
+	}
+	if (wnd.kbd.KeyIsPressed(VK_RIGHT)) {
+		delta_loc = { 1 , 0 };
+	}
+	if (wnd.kbd.KeyIsPressed(VK_DOWN)) {
+		delta_loc = { 0, 1 };
+	}
+	if (wnd.kbd.KeyIsPressed(VK_UP)) {
+		delta_loc = { 0,-1 };
+	}
+
+	return delta_loc;
+}
 void Game::ComposeFrame()
 {
 	if ((GameStart) && (!GameOver)) {
+		
 		snake.Draw(board);
 		goal.Draw(board);
 		border.Draw(board);
@@ -119,3 +128,4 @@ void Game::ComposeFrame()
 		SpriteCodex::DrawTitle(250, 250, gfx);
 	}
 }
+

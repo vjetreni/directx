@@ -11,7 +11,6 @@ private:
 		void Draw(Board& brd) const;
 		void Follow( Segment& next);
 		void MoveBy(Location& delta_loc);
-		//bool TestCollision(Location& loc_in) const;
 		Location GetLoc() const;
 
 	private:

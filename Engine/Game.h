@@ -30,6 +30,7 @@
 #include "Border.h"
 #include "Trash.h"
 #include <random>
+#include "FrameTimer.h"
 
 
 
@@ -45,6 +46,7 @@ private:
 	void UpdateModel();
 	/********************************/
 	/*  User Functions              */
+	Location DetermineDirection();
 	/********************************/
 private:
 	MainWindow& wnd;
@@ -70,11 +72,13 @@ private:
 	Border border;
 	Trash trash;
 
-	int snakeRatePeriod = 10;
-	int snakeRateCounter = 0;
+	FrameTimer frameTimer;
 
-	int trashAppearanceRate = 100;
-	int trashAppearanceCounter = 0;
+	float snakeRatePeriod = 10.0f;
+	float snakeRateCounter = 0.0f;
+
+	float trashAppearanceRatePeriod = 100.0f;
+	float trashAppearanceCounter = 0.0f;
 
 	int GameStart = 0;
 	int GameOver = 0;
